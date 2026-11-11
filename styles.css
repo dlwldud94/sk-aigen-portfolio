@@ -129,3 +129,5 @@
 .service-info h3,.service-info p{word-break:keep-all}
 
 .presentation-showcase+.presentation-showcase{margin-top:18px}
+
+.works-note{margin:-52px 0 0;font-size:13px;letter-spacing:-.01em;color:rgba(16,21,25,.58)}
