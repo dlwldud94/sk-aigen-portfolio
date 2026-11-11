@@ -1,0 +1,23 @@
+const progress=document.getElementById('progress');function updateProgress(){const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?scrollY/max*100:0)+'%'}addEventListener('scroll',updateProgress,{passive:true});updateProgress();
+const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.08});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+const menuButton=document.getElementById('menuButton'),mobileMenu=document.getElementById('mobileMenu');menuButton.addEventListener('click',()=>{const open=mobileMenu.classList.toggle('open');menuButton.setAttribute('aria-expanded',String(open))});mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobileMenu.classList.remove('open');menuButton.setAttribute('aria-expanded','false')}));
+const assetMap={'service-screen.jpg':'북팔 서비스 화면','presentation.jpg':'대학원 발표 슬라이드','art-01.jpg':'미술 작품 01','art-02.jpg':'미술 작품 02'};const loaded={};Object.keys(assetMap).forEach(file=>{const img=new Image();img.onload=()=>{loaded[file]=true;document.querySelectorAll('[data-image="'+file+'"]').forEach(el=>{el.style.backgroundImage='url("assets/'+file+'")';el.classList.add('has-image');if(el.classList.contains('art-frame'))el.querySelector('span').style.display='none'})};img.src='assets/'+file});
+const lightbox=document.getElementById('lightbox'),content=document.getElementById('lightboxContent'),caption=document.getElementById('lightboxCaption');document.querySelectorAll('[data-art]').forEach(btn=>btn.addEventListener('click',()=>{const file=btn.dataset.art;content.replaceChildren();if(loaded[file]){const img=document.createElement('img');img.src='assets/'+file;img.alt=btn.dataset.title;content.append(img)}else{const p=document.createElement('div');p.className='lightbox-placeholder';p.textContent='assets/'+file+' 파일을 추가하면 이곳에 작품이 표시됩니다.';content.append(p)}caption.textContent=btn.dataset.title;lightbox.showModal()}));document.getElementById('closeLightbox').addEventListener('click',()=>lightbox.close());lightbox.addEventListener('click',e=>{if(e.target===lightbox)lightbox.close()});
+
+(()=>{const root=document.querySelector('.works-carousel');if(!root)return;const track=root.querySelector('.works-track'),vp=root.querySelector('.works-viewport'),cnt=root.querySelector('.works-counter b'),real=[...track.children],n=real.length,C=2;
+const mk=e=>{const c=e.cloneNode(true);c.classList.add('is-clone');c.setAttribute('aria-hidden','true');return c};
+real.slice(-C).forEach(e=>track.insertBefore(mk(e),track.firstChild));real.slice(0,C).forEach(e=>track.appendChild(mk(e)));
+const all=[...track.children];let pos=C,timer=null,sx=null;
+const place=()=>{const s=all[pos],off=s.offsetLeft-(vp.clientWidth-s.offsetWidth)/2;track.style.transform='translateX('+(-off)+'px)';all.forEach((e,k)=>e.classList.toggle('is-active',k===pos));cnt.textContent=((pos-C)%n+n)%n+1};
+const jump=()=>{if(pos>=C&&pos<n+C)return 0;const d=pos<C?n:-n;pos+=d;track.classList.add('no-anim');place();void track.offsetWidth;track.classList.remove('no-anim');return d};
+const go=f=>{const d=jump();pos=f(pos,d);place()};
+track.addEventListener('transitionend',e=>{if(e.target===track&&e.propertyName==='transform')jump()});
+const play=()=>{stop();if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;timer=setInterval(()=>go(p=>p+1),4500)},stop=()=>clearInterval(timer);
+root.querySelector('.prev').addEventListener('click',()=>{go(p=>p-1);play()});root.querySelector('.next').addEventListener('click',()=>{go(p=>p+1);play()});
+all.forEach((e,k)=>e.addEventListener('click',()=>{if(k!==pos){go((p,d)=>k+d);play()}}));
+root.addEventListener('mouseenter',stop);root.addEventListener('mouseleave',play);root.addEventListener('focusin',stop);
+root.addEventListener('pointerdown',e=>{sx=e.clientX});root.addEventListener('pointerup',e=>{if(sx===null)return;const d=e.clientX-sx;sx=null;if(Math.abs(d)>40){go(p=>p+(d<0?1:-1));play()}});
+root.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')go(p=>p-1);else if(e.key==='ArrowRight')go(p=>p+1)});root.tabIndex=0;
+addEventListener('resize',()=>{track.classList.add('no-anim');place();void track.offsetWidth;track.classList.remove('no-anim')});
+addEventListener('load',()=>{track.classList.add('no-anim');place();void track.offsetWidth;track.classList.remove('no-anim')});
+track.classList.add('no-anim');place();void track.offsetWidth;track.classList.remove('no-anim');play()})();
